@@ -112,10 +112,6 @@ travis_sem_ausentes <- travis_selecionado[complete.cases(travis_selecionado),]
    travis_pr_true$tr_log_bool_tests_failed <- NULL
    travis_pr_true$tr_log_bool_tests_ran <- NULL
  
- controlParams <- rfeControl(functions=rfFuncs, method="cv", number=10)
- 
- results <- results <- rfe(travis_reduzido[,1:21], travis_reduzido[,22], sizes=c(1:21), rfeControl = controlParams)
- 
 # Separando os dados sem variáveis categóricas para aplicação dos modelos
  
  
@@ -156,10 +152,4 @@ travis_sem_ausentes <- travis_selecionado[complete.cases(travis_selecionado),]
  dataset_para_bayes.treino$tr_log_analyzer <- NULL
  dataset_para_bayes.treino$tr_log_frameworks <- NULL
  
- # Treinando o modelo naive bayes
-
- set.seed(123)
  
- nb = naiveBayes(build_successful ~ ., data = dataset_para_bayes.treino)
- predictionsNB <- predict(nb, newdata = dataset_para_bayes.treino)
- confusionMatrix(ifelse(predictionsNB > 0.5, "FALSE", "TRUE"), dataset_para_bayes.treino$build_successful)
