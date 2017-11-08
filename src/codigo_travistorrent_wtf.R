@@ -8,6 +8,9 @@ library(Amelia)
 library(corrplot)
 library(caret)
 library(rpart)
+library(rpart.plot)
+library(VIM)
+library(randomForest)
 
 # Carregando arquivo .csv
 
@@ -49,9 +52,9 @@ travis_sem_ausentes <- travis_selecionado[complete.cases(travis_selecionado),]
  corrplot(correlacao, order="AOE", method="square", col=cores(20), tl.srt=45, tl.cex=0.75, tl.col="black")
  corrplot(correlacao, add=TRUE, type="lower", method="number", order="AOE", col="black", diag=FALSE, tl.pos="n", cl.pos="n", number.cex=0.75)
 
- # # Recursive Geature Elimination
+ # # Recursive Feature Elimination (ALtamente custoso)
  
- # Utilizando por meio de cross validation
+ # Utilizando por meio de cross validation - Random Forest
  
  parametrosControle <- rfeControl(functions=rfFuncs, method="cv", number=10)
  
@@ -59,7 +62,15 @@ travis_sem_ausentes <- travis_selecionado[complete.cases(travis_selecionado),]
 
  rfeResults <- rfe(travis_sem_ausentes[,1:27], travis_sem_ausentes[,28], sizes=c(1:27),rfeControl=parametrosControle)
  
- # # Detecção de Outliers no dataset
+  # # Utilizando Boruta
+ 
+ plot(boruta.train, xlab = "", xaxt = "n")
+ lz<-lapply(1:ncol(boruta.train$build_successful),function(i)boruta.train$build_successful[is.finite(boruta.train$build_successful[,i]),i])
+ names(lz) <- colnames(boruta.train$ImpHistory)
+ Labels <- sort(sapply(lz,median))
+ axis(side = 1,las=2,labels = names(Labels),at = 1:ncol(boruta.train$ImpHistory), cex.axis = 0.7)
+ 
+  # # Detecção de Outliers no dataset
  
 # Retirando variaveis categóricas
 
@@ -118,6 +129,7 @@ travis_sem_ausentes <- travis_selecionado[complete.cases(travis_selecionado),]
 # Dividindo o dataset em 80% para treino e 20% para teste
  
  dataset_para_arvore <- travis_sem_ausentes
+ 
  trainIndex <- createDataPartition(dataset_para_arvore$build_successful, p=0.80, list=FALSE)
  dataset_para_arvore.treino <- dataset_para_arvore[ trainIndex,]
  dataset_para_arvore.teste <- dataset_para_arvore [-trainIndex,]
@@ -125,11 +137,46 @@ travis_sem_ausentes <- travis_selecionado[complete.cases(travis_selecionado),]
 # Treinando o modelo de arvore de decisão
  set.seed(123)
  
+ dataset_para_arvore.treino$tr_build_id <- NULL
+ dataset_para_arvore.treino$gh_project_name <- NULL
+ dataset_para_arvore.treino$gh_lang <- NULL
+
+ 
+ 
  tree = rpart(build_successful ~ ., data = dataset_para_arvore.treino, control = rpart.control(cp=0.00149092), method="class")
  predictions <- predict(tree, newdata = dataset_para_arvore.treino)
  confusionMatrix(ifelse(predictions[,1] > 0.5, "FALSE", "TRUE"), dataset_para_arvore.treino$build_successful)
 
-# Treinando o modelo para bayes
+#  Imprimindo a árvore
+ 
+  rpart.plot(tree)
+  
+# # Otimização de modelos por Random Search e Grid Search  
+
+  travis_amostra_5k <- travis_sem_ausentes[1:5000,]
+  travis_amostra_5k$build_successful <- as.factor(travis_amostra_5k$build_successful)
+  x <-travis_amostra_5k[,1:20]
+  y <-travis_amostra_5k[,21]
+  set.seed(123)
+  metric <- "Accuracy"
+  mtry <- sqrt(ncol(x))
+  
+  # Criando um modelo com parâmetros padrão
+  
+  trainControl <- trainControl(method="repeatedcv", number=10, repeats=3)
+  tunegrid <- expand.grid(.mtry=mtry)
+  rfDefault <- train(build_successful~., data=travis_amostra_5k, method="rpart", metric=metric, tuneGrid=tunegrid, trControl= trainControl)
+  
+  print(rfDefault)
+  
+  # Otimização com Random Search
+  
+  trainControl <- trainControl(method="repeatedcv", number=10, repeats=3, search="random")
+  rfRandom <- train(build_successful~., data=travis_amostra_5k, method="rpart", metric=metric, tuneLength=15,trControl=trainControl)
+  print(rfRandom)
+  
+  
+  # Treinando o modelo para bayes
  
  dataset_para_bayes <- travis_sem_ausentes
  trainIndex <- createDataPartition(dataset_para_bayes$build_successful, p=0.80, list=FALSE)
@@ -152,4 +199,7 @@ travis_sem_ausentes <- travis_selecionado[complete.cases(travis_selecionado),]
  dataset_para_bayes.treino$tr_log_analyzer <- NULL
  dataset_para_bayes.treino$tr_log_frameworks <- NULL
  
+ nb = naiveBayes(build_successful ~ ., data = dataset_para_bayes.treino)
+ predictionsNB <- predict(nb, newdata = dataset_para_bayes.treino)
+ confusionMatrix(ifelse(predictionsNB > 0.5, "FALSE", "TRUE"), dataset_para_bayes.treino$build_successful)
  
