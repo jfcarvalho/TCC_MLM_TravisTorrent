@@ -267,4 +267,3 @@ print(rfRandom)
 
 tunegrid_arvore <- expand.grid(.cp=seq(0,0.1,by=0.001))
 treeGrid <- train(build_successful~., data=travis_balanceado_java.smote_svac, method="rpart", metric=metric, tuneGrid=tunegrid_arvore,trControl=trainControl)
- 
