@@ -113,9 +113,6 @@ projetos_true <-    travis_build_true %>%
   tally()
 
 
-
-
-
 geoserver <- travis_sem_ausentes %>% filter(gh_project_name == 'geoserver/geoserver')
 facebook <- travis_sem_ausentes %>% filter(gh_project_name == 'facebook/presto')
 puppet <- travis_sem_ausentes %>% filter(gh_project_name == 'puppetlabs/puppet') 
@@ -128,23 +125,23 @@ open_project <- travis_sem_ausentes %>% filter(gh_project_name == 'opf/openproje
 
 # # Visualização de dados para o geoserver
 
-boxplot(puppet$gh_team_size, android$gh_team_size, diaspora$gh_team_size, mifosx$gh_team_size, vagrant$gh_team_size, facebook$gh_team_size, geoserver$gh_team_size, 
+boxplot(puppet$gh_team_size, android$gh_team_size, diaspora$gh_team_size, mifosx$gh_team_size, open_project$gh_team_size, facebook$gh_team_size, geoserver$gh_team_size, 
                  xlab="Projetos", ylab="Tamanho da equipe", 
                  col=topo.colors(7))
  
-   legend("topright",inset=.02, title="Descrição dos projetos", c("puppet", "android", "diaspora", "mifos", "vagrant", "facebook", "geoserver"), fill=topo.colors(7), horiz=TRUE, cex=0.8)
+   legend("topright",inset=.02, title="Descrição dos projetos", c("puppet", "android", "diaspora", "mifos", "open project", "facebook", "geoserver"), fill=topo.colors(7), horiz=TRUE, cex=0.8)
 
-boxplot(puppet$gh_sloc, android$gh_sloc, diaspora$gh_sloc, mifosx$gh_sloc, vagrant$gh_sloc, facebook$gh_sloc, geoserver$gh_sloc, 
+boxplot(puppet$gh_sloc, android$gh_sloc, diaspora$gh_sloc, mifosx$gh_sloc, open_project$gh_sloc, facebook$gh_sloc, geoserver$gh_sloc, 
            xlab="Projetos", ylab="GH SLOC", 
            col=topo.colors(7))
    
-   legend("topright",inset=.02, title="Descrição dos projetos", c("puppet", "android", "diaspora", "mifos", "vagrant", "facebook", "geoserver"), fill=topo.colors(7), horiz=TRUE, cex=0.8)
+   legend("topright",inset=.02, title="Descrição dos projetos", c("puppet", "android", "diaspora", "mifos", "open_project", "facebook", "geoserver"), fill=topo.colors(7), horiz=TRUE, cex=0.8)
    
-boxplot(puppet$gh_num_commits_on_files_touched, android$gh_num_commits_on_files_touched, diaspora$gh_num_commits_on_files_touched, mifosx$gh_num_commits_on_files_touched, vagrant$gh_num_commits_on_files_touched, facebook$gh_num_commits_on_files_touched, geoserver$gh_num_commits_on_files_touched, 
+boxplot(puppet$gh_num_commits_on_files_touched, android$gh_num_commits_on_files_touched, diaspora$gh_num_commits_on_files_touched, mifosx$gh_num_commits_on_files_touched, open_project$gh_num_commits_on_files_touched, facebook$gh_num_commits_on_files_touched, geoserver$gh_num_commits_on_files_touched, 
            xlab="Projetos", ylab="GH num commirs on files touched", 
            col=topo.colors(7))
    
-   legend("topright",inset=.02, title="Descrição dos projetos", c("puppet", "android", "diaspora", "mifos", "vagrant", "facebook", "geoserver"), fill=topo.colors(7), horiz=TRUE, cex=0.8)
+   legend("topright",inset=.02, title="Descrição dos projetos", c("puppet", "android", "diaspora", "mifos", "open_project", "facebook", "geoserver"), fill=topo.colors(7), horiz=TRUE, cex=0.8)
    
 rfeControl <- rfeControl(functions=rfFuncs, method="cv", number=10)
 
@@ -157,11 +154,6 @@ open_project$tr_build_id <- NULL
 open_project$gh_project_name <- NULL
 open_project$gh_is_pr <- NULL
 open_project$gh_lang <- NULL
-
-vagrant$tr_build_id <- NULL
-vagrant$gh_project_name <- NULL
-vagrant$gh_is_pr <- NULL
-vagrant$gh_lang <- NULL
 
 rapid7$tr_build_id <- NULL
 rapid7$gh_project_name <- NULL
@@ -214,31 +206,13 @@ open_project <- as.data.frame(open_project)
 
 mice_plot <- aggr(ausentes, col=c("navyblue", "yellow"), numbers= TRUE, sortVars=TRUE, labels=names(ausentes), gap=1)
 
-cores <- colorRampPalette(c("red", "white", "blue"))
-
-correlacao_juntos <- cor(android[,c(1:16)])
-corrplot(correlacao_juntos, order="AOE", method="square", col=cores(20), tl.srt=45, tl.cex=0.75, tl.col="black")
-corrplot(correlacao_juntos, add=TRUE, type="lower", method="number", order="AOE", col="black", diag=FALSE, tl.pos="n", cl.pos="n", number.cex=0.75)
-
-correlacao_juntos <- cor(travis_sem_ausentes[,c(5:20)])
-corrplot(correlacao_juntos, order="AOE", method="square", col=cores(20), tl.srt=45, tl.cex=0.75, tl.col="black")
-corrplot(correlacao_juntos, add=TRUE, type="lower", method="number", order="AOE", col="black", diag=FALSE, tl.pos="n", cl.pos="n", number.cex=0.75)
-
-correlacao_juntos <- cor(travis_sem_ausentes[,c(5:20)])
-corrplot(correlacao_juntos, order="AOE", method="square", col=cores(20), tl.srt=45, tl.cex=0.75, tl.col="black")
-corrplot(correlacao_juntos, add=TRUE, type="lower", method="number", order="AOE", col="black", diag=FALSE, tl.pos="n", cl.pos="n", number.cex=0.75)
-
-
-
 results_rfe_android <- rfe(android[,-22], android[,22], sizes=c(1:21), rfeControl=rfeControl)
 results_rfe_facebook <- rfe(facebook[,-22], facebook[,22], sizes=c(1:21), rfeControl=rfeControl)
 results_rfe_geoserver <- rfe(geoserver[,-22], geoserver[,22], sizes=c(1:21), rfeControl=rfeControl)
-results_rfe_vagrant <- rfe(vagrant[,-20], vagrant[,20], sizes=c(1:19), rfeControl=rfeControl)
 results_rfe_mifosx <- rfe(mifosx[,-22], mifosx[,22], sizes=c(1:21), rfeControl=rfeControl)
 results_rfe_puppet <- rfe(puppet[,-22], puppet[,22], sizes=c(1:21), rfeControl=rfeControl)
 results_rfe_diaspora <- rfe(diaspora[,-22], diaspora[,22], sizes=c(1:21), rfeControl=rfeControl)
-
-str(rails)
+results_rfe_open_project <- rfe(open_project[,-22], open_project[,22], sizes=c(1:21), rfeControl=rfeControl)
 
 
 print(results_rfe_android)
@@ -246,24 +220,22 @@ print(results_rfe_facebook)
 print(results_rfe_geoserver)
 print(results_rfe_mifosx)
 print(results_rfe_puppet)
-print(results_rfe_vagrant)
 print(results_rfe_diaspora)
-
+print(results_rfe_open_project)
 
 predictors(results_rfe_android)
 predictors(results_rfe_facebook)
 predictors(results_rfe_geoserver)
 predictors(results_rfe_mifosx)
 predictors(results_rfe_puppet)
-predictors(results_rfe_vagrant)
 predictors(results_rfe_facebook)
+predictors(results_rfe_open_project)
 
 
 #Verificando quais amostras estão desbalanceadas
 
 prop.table(table(android$build_successful)) # desbalanceado
 prop.table(table(facebook$build_successful)) 
-prop.table(table(vagrant$build_successful)) # desbalanceado
 prop.table(table(diaspora$build_successful))
 prop.table(table(puppet$build_successful)) #desbalanceado
 prop.table(table(geoserver$build_successful))
@@ -281,7 +253,6 @@ diaspora <- ROSE(build_successful ~ ., data =diaspora, seed = 1)$data
 open_project <- ROSE(build_successful ~ ., data =open_project, seed = 1)$data
 
 prop.table(table(android$build_successful)) # balanceado
-prop.table(table(vagrant$build_successful)) # balanceado
 prop.table(table(puppet$build_successful)) # balanceado
 prop.table(table(mifosx$build_successful)) # balanceado
 prop.table(table(open_project$build_successful)) # balanceado
@@ -302,10 +273,6 @@ treino_geoserver <- geoserver[indiceValidacao_geoserver,]
 indiceValidacao_rapid7 <- createDataPartition(rapid7$build_successful, p=0.80, list=FALSE)
 teste_rapid7 <- rapid7[-indiceValidacao_rapid7,]
 treino_rapid7 <- rapid7[indiceValidacao_rapid7,]
-
-indiceValidacao_vagrant_modificado <- createDataPartition(vagrant_modificado$build_successful, p=0.80, list=FALSE)
-teste_vagrant_modificado <- vagrant_modificado[-indiceValidacao_vagrant_modificado,]
-treino_vagrant_modificado <- vagrant_modificado[indiceValidacao_vagrant_modificado,]
 
 indiceValidacao_open_project <- createDataPartition(open_project$build_successful, p=0.80, list=FALSE)
 teste_open_project <- open_project[-indiceValidacao_open_project,]
@@ -364,6 +331,7 @@ modelos_mifosx
 modelos_android
 modelos_rapid7
 modelos_diaspora
+modelos_open_project
 
 
 
@@ -375,14 +343,13 @@ resultsCaret_puppet <- resamples(modelos_puppet)
 resultsCaret_facebook <- resamples(modelos_facebook)
 resultsCaret_mifosx <- resamples(modelos_mifosx)
 resultsCaret_diaspora <- resamples(modelos_diaspora)
+resultsCaret_open_project <- resamples(modelos_open_project)
 
 scales <- list(x=list(relation="free"), y=list(relation="free"))
 
 # Resultados para Android
 bwplot(resultsCaret_android, scales=scales)
 
-# Resultados para Vagrant
-bwplot(resultsCaret_vagrant, scales=scales)
 
 # Resultados para Geoserver
 bwplot(resultsCaret_geoserver, scales=scales)
@@ -398,24 +365,25 @@ bwplot(resultsCaret_mifosx, scales=scales)
 
 # Resultados para Diaspora
 bwplot(resultsCaret_diaspora, scales=scales)
+bwplot(resultsCaret_open_project, scales=scales)
 
 # Verificando corelações entre modelos
 
 modelCor(resultsCaret_android)
 modelCor(resultsCaret_facebook)
-modelCor(resultsCaret_vagrant)
 modelCor(resultsCaret_geoserver)
 modelCor(resultsCaret_puppet)
 modelCor(resultsCaret_diaspora)
 modelCor(resultsCaret_mifosx)
+modelCor(resultsCaret_open_project)
 
 splom(resultsCaret_android)
 splom(resultsCaret_facebook)
-splom(resultsCaret_vagrant)
 splom(resultsCaret_geoserver)
 splom(resultsCaret_puppet)
 splom(resultsCaret_diaspora)
 splom(resultsCaret_mifosx)
+splom(resultsCaret_open_project)
 
 
 trainControl <- trainControl(method="repeatedcv", number=10, repeats=10, savePredictions=TRUE, classProbs=TRUE, allowParallel = TRUE)
@@ -428,12 +396,12 @@ stack_android.svm <- caretStack(modelos_android, method="svmRadial", metric="Acc
 stack_diaspora.svm <- caretStack(modelos_diaspora, method="svmRadial", metric="Accuracy", trControl=stackControl)
 stack_rapid7.svm <- caretStack(modelos_rapid7, method="svmRadial", metric="Accuracy", trControl=stackControl)
 stack_geoserver.svm <- caretStack(modelos_geoserver, method="svmRadial", metric="Accuracy", trControl=stackControl)
+stack_open_project.svm <- caretStack(modelos_open_project, method="svmRadial", metric="Accuracy", trControl=stackControl)
 
 
 stack_facebook.rf <- caretStack(modelos_facebook, method="rf", metric="Accuracy", trControl=stackControl)
 stack_puppet.rf <- caretStack(modelos_puppet, method="rf", metric="Accuracy", trControl=stackControl)
 stack_mifosx.rf <- caretStack(modelos_mifosx, method="rf", metric="Accuracy", trControl=stackControl)
-stack_vagrant.rf <- caretStack(modelos_vagrant, method="rf", metric="Accuracy", trControl=stackControl)
 stack_android.rf <- caretStack(modelos_android, method="rf", metric="Accuracy", trControl=stackControl)
 stack_diaspora.rf <- caretStack(modelos_diaspora, method="rf", metric="Accuracy", trControl=stackControl)
 stack_geoserver.rf <- caretStack(modelos_geoserver, method="rf", metric="Accuracy", trControl=stackControl)
@@ -443,7 +411,6 @@ stack_facebook.dt <- caretStack(modelos_facebook, method="rpart", metric="Accura
 stack_puppet.dt <- caretStack(modelos_puppet, method="rpart", metric="Accuracy", trControl=stackControl)
 stack_mifosx.dt <- caretStack(modelos_mifosx, method="rpart", metric="Accuracy", trControl=stackControl)
 stack_diaspora.dt <- caretStack(modelos_diaspora, method="rpart", metric="Accuracy", trControl=stackControl)
-stack_vagrant.dt <- caretStack(modelos_vagrant, method="rpart", metric="Accuracy", trControl=stackControl)
 stack_geoserver.dt <- caretStack(modelos_geoserver, method="rpart", metric="Accuracy", trControl=stackControl)
 stack_android.dt <- caretStack(modelos_android, method="rpart", metric="Accuracy", trControl=stackControl)
 
@@ -456,7 +423,6 @@ stack_mifosx.nb <- caretStack(modelos_mifosx, method="nb", metric="Accuracy", tr
 stack_android.nb <- caretStack(modelos_android, method="nb", metric="Accuracy", trControl=stackControl)
 stack_geoserver.nb <- caretStack(modelos_geoserver, method="nb", metric="Accuracy", trControl=stackControl)
 stack_diaspora.nb <- caretStack(modelos_diaspora, method="nb", metric="Accuracy", trControl=stackControl)
-stack_vagrant.nb <- caretStack(modelos_vagrant, method="nb", metric="Accuracy", trControl=stackControl)
 
 pesoModelos <- caretEnsemble(modelos_facebook)
 pesoModelos_android <- caretEnsemble(modelos_android)
@@ -476,7 +442,6 @@ tree = rpart(build_successful ~ ., data = treino_android)
 tree_fb = rpart(build_successful ~ ., data = treino_facebook)
 tree_ppt = rpart(build_successful ~ ., data = treino_puppet)
 tree_mfx = rpart(build_successful ~ ., data = treino_mifosx)
-tree_vagrant = rpart(build_successful ~ ., data = treino_vagrant)
 
 # Verifica os resultados nos dados de treino
 predictions <- predict(tree, newdata = teste_android)
@@ -507,8 +472,6 @@ predictionsRF_facebook <- predict(rf_facebook, newdata = teste_facebook)
 roc.curve(teste_facebook$build_successful, predictionsRF_facebook)
 table(predictionsRF_facebook, teste_facebook$build_successful)
 
-confusionMatrix(ifelse(predictionsRF_facebook > 0.5, "false.", "true."), teste_facebook$build_successful)
-
 # # Random FOrest Mifosx
 
 rf_mifosx = randomForest(build_successful ~ ., data = treino_mifosx)
@@ -520,20 +483,9 @@ table(predictionsRF_mifosx, teste_mifosx$build_successful)
 # # Random FOrest Vagrant
 
 # Verifica os resultados nos dados de treino
-nb_facebook = naiveBayes(build_successful~., data=treino_facebook)
-predictionsNB_fb <- predict(nb_facebook, newdata = as.data.frame(teste_facebook))
-roc.curve(teste_facebook$build_successful, predictionsNB_fb)
-
-nb_mifosx = naiveBayes(build_successful~., data=treino_mifosx)
-predictionsNB_mifosx <- predict(nb_mifosx, newdata = as.data.frame(teste_mifosx))
-roc.curve(teste_mifosx$build_successful, predictionsNB_mifosx)
 
 # # SVM Vagrant
 
-treino_vagrant$gh_diff_tests_added <- NULL
-treino_vagrant$gh_diff_tests_deleted <- NULL
-teste_vagrant$gh_diff_tests_added <- NULL
-teste_vagrant$gh_diff_tests_deleted <- NULL
 
 svm_geoserver = svm(build_successful~., data=treino_geoserver)
 predictionsSVM_geoserver <- predict(svm_geoserver, newdata = as.data.frame(teste_geoserver))
@@ -546,22 +498,6 @@ predictionsSVM_diaspora <- predict(stack_diaspora.svm, newdata = as.data.frame(t
 accuracy.meas(teste_diaspora$build_successful, predictionsSVM_diaspora)
 roc.curve(teste_diaspora$build_successful, predictionsSVM_diaspora)
 table(predictionsSVM_diaspora, teste_diaspora$build_successful)
-
-#svm_puppet = svm(build_successful~., data=treino_puppet)
-#predictionsSVM_puppet <- predict(stack_puppet.svm, newdata = as.data.frame(teste_puppet))
-#accuracy.meas(teste_puppet$build_successful, predictionsSVM_puppet)
-#roc.curve(teste_puppet$build_successful, predictionsSVM_puppet)
-#table(predictionsSVM_puppet, teste_puppet$build_successful)
-
-
-svm_mifosx = svm(build_successful~., data=treino_mifosx)
-predictionsSVM_mifosx <- predict(svm_mifosx, newdata = as.data.frame(teste_mifosx))
-accuracy.meas(teste_mifosx$build_successful, predictionsSVM_mifosx)
-roc.curve(teste_mifosx$build_successful, predictionsSVM_mifosx)
-table(predictionsSVM_mifosx, teste_mifosx$build_successful)
-
-tune.results <- tune(svm, train.x = treino_vagrant[1:21], train.y = treino_vagrant[,22], kernel='radial', ranges = list(cost=c(0.1,1,10), gamma=c(0.5,1,2)))
-roc.curve(teste_vagrant$build_successful, predictionsSVM_vagrant)
 
 # # SVM Android
 
@@ -622,4 +558,3 @@ predictionsNB_diaspora <- predict(modelos_diaspora$nb, newdata = as.data.frame(t
 roc.curve(teste_diaspora$build_successful, predictionsNB_diaspora)
 accuracy.meas(teste_geoserver$build_successful, predictionsNB_geoserver)
 table(predictionsNB_diaspora, teste_diaspora$build_successful)
-
